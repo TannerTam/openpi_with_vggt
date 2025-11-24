@@ -92,6 +92,10 @@ class PaliGemmaWithExpertModelAndVggt(nn.Module):
 
     def embed_language_tokens(self, tokens: torch.Tensor):
         return self.paligemma.language_model.embed_tokens(tokens)
+    
+    def vggt_embed_image(self, image: torch.Tensor):
+        aggregated_tokens_list, ps_idx = self.vggt.aggregator(image)
+        return aggregated_tokens_list, ps_idx
 
     def forward(
         self,
@@ -158,6 +162,8 @@ class PaliGemmaWithExpertModelAndVggt(nn.Module):
                         f"Gemma expert model gradient_checkpointing value: {self.gemma_expert.model.gradient_checkpointing}"
                     )
                 self._debug_gc_printed = True
+
+            
 
             # Define the complete layer computation function for gradient checkpointing
             def compute_layer_complete(layer_idx, inputs_embeds, attention_mask, position_ids, adarms_cond):

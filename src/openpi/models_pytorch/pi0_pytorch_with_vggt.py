@@ -103,6 +103,8 @@ class PI0Pytorch(nn.Module):
             precision=config.dtype,
         )
 
+        self.vggt_img_fusion_mlp = nn.Linear(2048 + 1024, 2048)
+        
         self.action_in_proj = nn.Linear(32, action_expert_config.width)
         self.action_out_proj = nn.Linear(action_expert_config.width, 32)
 
@@ -207,9 +209,21 @@ class PI0Pytorch(nn.Module):
 
             img_emb = self._apply_checkpoint(image_embed_func, img)
 
+            def vggt_embed_func(img):
+                return self.paligemma_with_expert_and_vggt.vggt_embed_image(img)
+            
+            vggt_emb = self._apply_checkpoint(vggt_embed_func, img)
+
+            def vggt_img_embs_fusion_func(img_emb, vggt_emb):
+                combined = torch.cat([img_emb, vggt_emb], dim=-1)
+                fused_embs = self.vggt_img_fusion_mlp(combined)
+                return fused_embs
+            
+            fused_emb = self._apply_checkpoint(vggt_img_embs_fusion_func, img_emb, vggt_emb)
+
             bsize, num_img_embs = img_emb.shape[:2]
 
-            embs.append(img_emb)
+            embs.append(fused_emb)
             pad_masks.append(img_mask[:, None].expand(bsize, num_img_embs))
 
             # Create attention masks so that image tokens attend to each other
