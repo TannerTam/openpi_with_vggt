@@ -103,7 +103,7 @@ class PI0Pytorch(nn.Module):
             precision=config.dtype,
         )
 
-        self.vggt_img_fusion_mlp = nn.Linear(2048 + 1024, 2048)
+        self.vggt_img_fusion_mlp = nn.Linear(2048 + 1374, 2048)
         
         self.action_in_proj = nn.Linear(32, action_expert_config.width)
         self.action_out_proj = nn.Linear(action_expert_config.width, 32)
@@ -210,6 +210,10 @@ class PI0Pytorch(nn.Module):
             img_emb = self._apply_checkpoint(image_embed_func, img)
 
             def vggt_embed_func(img):
+                from PIL import Image
+
+                size = (518, 518)
+                img = img = img.resize(size, Image.Resampling.LANCZOS)
                 return self.paligemma_with_expert_and_vggt.vggt_embed_image(img)
             
             vggt_emb = self._apply_checkpoint(vggt_embed_func, img)
