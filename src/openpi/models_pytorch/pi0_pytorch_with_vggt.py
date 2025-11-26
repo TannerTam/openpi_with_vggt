@@ -11,8 +11,6 @@ from openpi.models_pytorch.gemma_pytorch_with_vggt import PaliGemmaWithExpertMod
 import openpi.models_pytorch.preprocessing_pytorch as _preprocessing
 
 from vggt.models.vggt import VGGT
-from vggt.utils.load_fn import load_and_preprocess_images
-from vggt.utils.pose_enc import pose_encoding_to_extri_intri
 
 def get_safe_dtype(target_dtype, device_type):
     """Get a safe dtype for the given device type."""
@@ -222,20 +220,16 @@ class PI0Pytorch(nn.Module):
             
             vggt_emb = self._apply_checkpoint(vggt_embed_func, img)
 
-            def vggt_img_embs_fusion_func(img_emb, vggt_emb):
-                combined = torch.cat([img_emb, vggt_emb], dim=-1)
-                fused_embs = self.vggt_img_fusion_mlp(combined)
-                return fused_embs
-            
-            fused_emb = self._apply_checkpoint(vggt_img_embs_fusion_func, img_emb, vggt_emb)
-
             bsize, num_img_embs = img_emb.shape[:2]
+            bsize, num_vggt_embs = vggt_emb.shape[:2]
 
-            embs.append(fused_emb)
+            embs.append(img_emb)
+            embs.append(vggt_emb)
             pad_masks.append(img_mask[:, None].expand(bsize, num_img_embs))
+            pad_masks.append(img_mask[:, None].expand(bsize, num_vggt_embs))
 
             # Create attention masks so that image tokens attend to each other
-            att_masks += [0] * num_img_embs
+            att_masks += [0] * ( num_img_embs + num_vggt_embs )
 
         # Process language tokens
         def lang_embed_func(lang_tokens):
