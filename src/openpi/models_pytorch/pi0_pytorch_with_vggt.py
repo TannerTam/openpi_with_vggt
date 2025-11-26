@@ -211,9 +211,13 @@ class PI0Pytorch(nn.Module):
 
             def vggt_embed_func(img):
                 from PIL import Image
+                from torchvision import transforms as TF
+                to_tensor = TF.ToTensor()
 
                 size = (518, 518)
-                img = img = img.resize(size, Image.Resampling.LANCZOS)
+                img.resize(size, Image.Resampling.BICUBIC)
+                img = to_tensor(img)
+
                 return self.paligemma_with_expert_and_vggt.vggt_embed_image(img)
             
             vggt_emb = self._apply_checkpoint(vggt_embed_func, img)

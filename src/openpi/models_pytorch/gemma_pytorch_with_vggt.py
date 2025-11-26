@@ -95,7 +95,8 @@ class PaliGemmaWithExpertModelAndVggt(nn.Module):
     
     def vggt_embed_image(self, image: torch.Tensor):
         aggregated_tokens_list, ps_idx = self.vggt.aggregator(image)
-        return aggregated_tokens_list, ps_idx
+        last_layer_toekn = aggregated_tokens_list[-1]
+        return last_layer_toekn
 
     def forward(
         self,
