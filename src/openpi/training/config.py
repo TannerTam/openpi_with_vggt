@@ -406,8 +406,8 @@ class MyDataConfig(DataConfigFactory):
                 _transforms.RepackTransform(
                     {
                         "observation/image": "observation.images.camera",
-                        "state": "observation.state",
-                        "actions": "action",
+                        "observation/state": "observation.state",
+                        "actions": "actions",
                         "prompt": "prompt",
                     }
                 ),
@@ -774,7 +774,7 @@ _CONFIGS = [
         name="pi0_franka_multi_view",
         model=pi0_config.Pi0Config(),
         data=MyDataConfig(
-            repo_id="lerobot_format/franka_cam10",
+            repo_id="lerobot_format/franka_test",
             base_config=DataConfig(
                 prompt_from_task=True,
             ),
