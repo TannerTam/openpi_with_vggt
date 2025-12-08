@@ -101,7 +101,7 @@ class PI0Pytorch(nn.Module):
             precision=config.dtype,
         )
 
-        self.vggt_img_fusion_mlp = nn.Linear(2048 + 1374, 2048)
+        # self.vggt_img_fusion_mlp = nn.Linear(2048 + 1374, 2048)
         
         self.action_in_proj = nn.Linear(32, action_expert_config.width)
         self.action_out_proj = nn.Linear(action_expert_config.width, 32)
@@ -208,15 +208,37 @@ class PI0Pytorch(nn.Module):
             img_emb = self._apply_checkpoint(image_embed_func, img)
 
             def vggt_embed_func(img):
-                from PIL import Image
-                from torchvision import transforms as TF
-                to_tensor = TF.ToTensor()
+                # img is already a torch.Tensor: (B, C, H, W) or (C, H, W)
 
-                size = (518, 518)
-                img.resize(size, Image.Resampling.BICUBIC)
-                img = to_tensor(img)
+                # Ensure 4D: (B, C, H, W)
+                if img.dim() == 3:
+                    img = img.unsqueeze(0)
 
-                return self.paligemma_with_expert_and_vggt.vggt_embed_image(img)
+                # Resize using torch (PIL NOT allowed)
+                img = F.interpolate(
+                    img.float(),
+                    size=(518, 518),
+                    mode="bicubic",
+                    align_corners=False,
+                )
+
+                # Normalize for VGGT ([-1, 1])
+                img = img / 255.0
+                img = img * 2 - 1
+
+                # Add sequence dimension: (B, C, H, W) -> (B, S, C, H, W)
+                img = img.unsqueeze(1)  # Now shape is (B, 1, C, H, W)
+                
+                # Convert to bfloat16 to match VGGT model dtype
+                img = img.to(dtype=torch.bfloat16)
+
+                vggt_output = self.paligemma_with_expert_and_vggt.vggt_embed_image(img)
+
+                B, _, N, D = vggt_output.shape
+                vggt_output = vggt_output.reshape(B, N, D)
+
+                return vggt_output
+
             
             vggt_emb = self._apply_checkpoint(vggt_embed_func, img)
 
