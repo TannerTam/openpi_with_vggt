@@ -771,8 +771,79 @@ _CONFIGS = [
         num_train_steps=30_000,
     ),
     TrainConfig(
-        name="pi0_franka_multi_view",
+        name="pi0_franka_exclude_cam10",
+        model=pi0_config.Pi0Config(max_token_len=300),
+        data=MyDataConfig(
+            repo_id="lerobot_format/franka_exclude_cam10",
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        # batch_size=256,# 默认32，占用62%
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        pytorch_weight_path="/workspace/tanner/checkpoints/openpi/pytorch/pi0_with_vggt",
+        num_train_steps=30_000,
+    ),  
+    TrainConfig(
+        name="pi0_franka_cam10",
         model=pi0_config.Pi0Config(),
+        data=MyDataConfig(
+            repo_id="lerobot_format/franka_cam10",
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        pytorch_weight_path="/workspace/tanner/checkpoints/openpi/pytorch/pi0_with_vggt",
+        num_train_steps=30_000,
+    ),
+    TrainConfig(
+        name="pi0_franka",
+        model=pi0_config.Pi0Config(),
+        data=MyDataConfig(
+            repo_id="lerobot_format/franka",
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        pytorch_weight_path="/workspace/tanner/checkpoints/openpi/pytorch/pi0_with_vggt",
+        num_train_steps=30_000,
+    ),    
+    TrainConfig(
+        name="pi0_ur5",
+        model=pi0_config.Pi0Config(),
+        data=MyDataConfig(
+            repo_id="lerobot_format/ur5",
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        pytorch_weight_path="/workspace/tanner/checkpoints/openpi/pytorch/pi0_with_vggt",
+        num_train_steps=30_000,
+    ),
+    TrainConfig(
+        name="pi0_ur10",
+        model=pi0_config.Pi0Config(),
+        data=MyDataConfig(
+            repo_id="lerobot_format/ur10",
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        pytorch_weight_path="/workspace/tanner/checkpoints/openpi/pytorch/pi0_with_vggt",
+        num_train_steps=30_000,
+    ),
+        TrainConfig(
+        name="pi0_franka_test",
+        model=pi0_config.Pi0Config(max_token_len=300),
         data=MyDataConfig(
             repo_id="lerobot_format/franka_test",
             base_config=DataConfig(
@@ -781,6 +852,20 @@ _CONFIGS = [
             extra_delta_transform=True,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        pytorch_weight_path="/workspace/tanner/checkpoints/openpi/pytorch/pi0_with_vggt",
+        num_train_steps=30_000,
+    ),
+    TrainConfig(
+        name="pi05_franka_cam10",
+        model=pi0_config.Pi0Config(pi05=True),
+        data=MyDataConfig(
+            repo_id="lerobot_format/franka_cam10",
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         num_train_steps=30_000,
     ),
     TrainConfig(
