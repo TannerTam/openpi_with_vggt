@@ -787,7 +787,7 @@ _CONFIGS = [
     ),  
     TrainConfig(
         name="pi0_franka_cam10",
-        model=pi0_config.Pi0Config(max_token_len=300,action_dim=16),
+        model=pi0_config.Pi0Config(max_token_len=300,action_horizon=16),
         data=MyDataConfig(
             repo_id="lerobot_format/franka_cam10",
             base_config=DataConfig(
@@ -795,7 +795,7 @@ _CONFIGS = [
             ),
             extra_delta_transform=True,
         ),
-        batch_size=1,
+        batch_size=32,
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
         pytorch_weight_path="/workspace/tanner/checkpoints/openpi/pytorch/pi0_with_vggt",
         num_train_steps=30_000,
